@@ -1,0 +1,3 @@
+ray_altitude_range: [-5, 105]
+val_interval: 3000
+ckpt_interval: 3000

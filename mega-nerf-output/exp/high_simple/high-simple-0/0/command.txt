@@ -1,0 +1,1 @@
+mega_nerf/train.py --config_file configs/mega-nerf/high-simple.yaml --exp_name output/high-simple-0 --dataset_path Datasets/high-simple --chunk_paths temp/high-simple-0 --cluster_mask_path Datasets/high-simple/mask/0 --train_iterations 300000 --no_bg_nerf --no_ellipse_bounds --noise_std 0.0 --use_gt_depth False
