@@ -135,3 +135,7 @@ If this work is helpful for your research, please cite the following BibTeX entr
 If you have any questions, please open a github issue or contact us.
 
 Zhenxin Zhu: zhenxinzhu163@163.com, Yuantao Chen: yuantao@xauat.edu.cn, Zirui Wu: wuzirui@bit.edu.cn, Chao Hou: houchao@connect.hku.hk
+
+## Acknowledgements
+
+We would like to thank [mega-nerf](https://github.com/cmusatyalab/mega-nerf), [barf](https://github.com/chenhsuanlin/bundle-adjusting-NeRF) and [inerf](https://github.com/salykovaa/inerf) for making their project public.
