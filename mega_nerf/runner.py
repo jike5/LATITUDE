@@ -25,8 +25,8 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms as T
 from tqdm import tqdm
 
-from mega_nerf.datasets.filesystem_dataset import FilesystemDataset
-from mega_nerf.datasets.memory_dataset import MemoryDataset
+from datasets.filesystem_dataset import FilesystemDataset
+from datasets.memory_dataset import MemoryDataset
 from image_metadata import ImageMetadata
 from metrics import psnr, ssim, lpips
 from misc_utils import main_print, main_tqdm
@@ -236,7 +236,7 @@ class Runner:
             else:
                 data_loader = DataLoader(dataset, batch_size=self.hparams.batch_size, shuffle=True, num_workers=0,
                                          pin_memory=True)
-            # BARF策略
+            # keep all frequencies(default is 0.5)
             self.nerf.embedding_xyz.progress.data.fill_(1.0) # train_iterations / self.hparams.train_iterations
             self.nerf.embedding_dir.progress.data.fill_(1.0) # train_iterations / self.hparams.train_iterations
 

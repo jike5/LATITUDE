@@ -4,32 +4,6 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 import numpy as np
-# class Embedding(nn.Module):
-#     def __init__(self, num_freqs: int, logscale=True):
-#         """
-#         Defines a function that embeds x to (x, sin(2^k x), cos(2^k x), ...)
-#         """
-#         super(Embedding, self).__init__()
-
-#         if logscale:
-#             self.freq_bands = 2 ** torch.linspace(0, num_freqs - 1, num_freqs)
-#         else:
-#             self.freq_bands = torch.linspace(1, 2 ** (num_freqs - 1), num_freqs)
-
-#         self.progress = torch.nn.Parameter(torch.tensor(0.))
-
-#     def forward(self, x: torch.Tensor) -> torch.Tensor:
-#         out = [x]
-#         for freq in self.freq_bands:
-#             out += [torch.sin(freq * x), torch.cos(freq * x)]
-
-#         output = torch.cat(out, -1)    
-#         alpha = (self.progress.data - 0.1) / (0.5 - 0.1) * self.freq_bands.shape[0]
-#         k = torch.arange(self.freq_bands.shape[0], dtype=torch.float32).cuda()
-#         weight = (1 - (alpha - k).clamp_(min=0, max=1).mul_(np.pi).cos_()) / 2
-#         # apply weights
-#         output = output * weight
-#         return output
 
 class Embedding(nn.Module):
     def __init__(self, num_freqs: int, logscale=True):
@@ -56,8 +30,7 @@ class Embedding(nn.Module):
         weight = (1 - (alpha - k).clamp_(min=0, max=1).mul_(np.pi).cos_()) / 2 # [L]
         one = torch.ones(x.shape[1]).cuda()
         weight = torch.cat((one, weight), 0)
-        # print("weight shape ", weight.shape)
-        # print("res shape", (output * weight).shape)
+
         return output * weight
 
 
