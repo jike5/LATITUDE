@@ -145,3 +145,4 @@ logs/
 output/
 merge_output/
 chunk_dir
+.idea/
