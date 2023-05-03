@@ -25,14 +25,15 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms as T
 from tqdm import tqdm
 
-from datasets.filesystem_dataset import FilesystemDataset
-from datasets.memory_dataset import MemoryDataset
+from mega_nerf.datasets.filesystem_dataset import FilesystemDataset
+from mega_nerf.datasets.memory_dataset import MemoryDataset
 from image_metadata import ImageMetadata
 from metrics import psnr, ssim, lpips
 from misc_utils import main_print, main_tqdm
 from models.model_utils import get_nerf, get_bg_nerf
-from ray_utils import get_rays, get_ray_directions
+from ray_utils import get_rays, get_ray_directions, get_rays_od
 from rendering import render_rays
+
 
 
 class Runner:
@@ -676,3 +677,249 @@ class Runner:
         version = 0 if len(existing_versions) == 0 else max(existing_versions) + 1
         experiment_path = exp_dir / str(version)
         return experiment_path
+
+    def render_mega_nerf_imgs(self, args, dl, hwf, device):
+        with torch.inference_mode():
+            self.nerf.eval()
+            H, W, focal = hwf
+            target_list = []
+            rgb_list = []
+            pose_list = []
+            directions = get_ray_directions(int(W // args.tinyscale), int(H // args.tinyscale), focal/args.tinyscale,
+                                            focal/args.tinyscale, (W//args.tinyscale)/2, (H//args.tinyscale)/2,
+                                            self.hparams.center_pixels, self.device)
+            index = 0
+            train_list = []
+            for train_index in self.train_items:
+                if train_index.is_val == False:
+                    train_list.append(train_index.image_index)
+            # random.shuffle(train_list)
+
+            for batch_idx, (target, pose, img_idx) in enumerate(dl):
+                if batch_idx % 10 == 0:
+                    print("renders {}/total {}".format(batch_idx, len(dl.dataset)))
+
+                target = target[0].permute(1, 2, 0).to(device)  # (240,360,3)
+                # pose_mega_nerf = self.train_items[train_list[index]].c2w
+                pose_mega_nerf = pose.view(3, 4)
+                rays = get_rays(directions, pose_mega_nerf.to(self.device), self.near, self.far, self.ray_altitude_range)
+                rays = rays.view(-1, 8).to(self.device, non_blocking=True)  # (H*W, 8)
+                image_indices = train_list[index] * torch.ones(rays.shape[0], device=rays.device) \
+                    if self.hparams.appearance_dim > 0 else None
+                results = {}
+
+                if 'RANK' in os.environ:
+                    nerf = self.nerf.module
+                else:
+                    nerf = self.nerf
+
+                if self.bg_nerf is not None and 'RANK' in os.environ:
+                    bg_nerf = self.bg_nerf.module
+                else:
+                    bg_nerf = self.bg_nerf
+
+                for i in range(0, rays.shape[0], self.hparams.image_pixel_batch_size):
+                    result_batch, _ = render_rays(nerf=nerf, bg_nerf=bg_nerf,
+                                                  rays=rays[i:i + self.hparams.image_pixel_batch_size],
+                                                  image_indices=image_indices[
+                                                            i:i + self.hparams.image_pixel_batch_size] if self.hparams.appearance_dim > 0 else None,
+                                                  hparams=self.hparams,
+                                                  sphere_center=self.sphere_center,
+                                                  sphere_radius=self.sphere_radius,
+                                                  get_depth=False,
+                                                  get_depth_variance=False,
+                                                  get_bg_fg_rgb=False)
+                    for key, value in result_batch.items():
+                        if key not in results:
+                            results[key] = []
+                        results[key].append(value.cpu())
+
+                for key, value in results.items():
+                    results[key] = torch.cat(value)
+
+                typ = 'fine' if 'rgb_fine' in results else 'coarse'
+                viz_result_rgbs = results[f'rgb_{typ}'].view(
+                    torch.Size([int(H // args.tinyscale), int(W // args.tinyscale), 3])).cpu()
+                # get rendered rgb(reshape to same size)
+                rgb = viz_result_rgbs.contiguous()
+                # generate nerf image
+                # torch.set_default_tensor_type('torch.cuda.FloatTensor')
+                # convert rgb to B,C,H,W
+                rgb = rgb[None, ...].permute(0, 3, 1, 2)
+                # upsample rgb to hwf size
+                rgb = torch.nn.Upsample(size=(H, W), mode='bicubic')(rgb)
+                # convert rgb back to H,W,C format
+                rgb = rgb[0].permute(1, 2, 0)
+                # # torch.set_default_tensor_type('torch.FloatTensor')
+
+                target_list.append(target.cpu())
+                rgb_list.append(rgb.cpu())
+                pose_list.append(pose_mega_nerf.cpu())
+                index+=1
+
+            targets = torch.stack(target_list).detach()
+            rgbs = torch.stack(rgb_list).detach()
+            poses = torch.stack(pose_list).detach()
+        return targets, rgbs, poses
+
+    def render_virtual_meganerf_imgs(self, args, pose_perturb, hwf, device):
+        ''' render mega-nerf images, save unscaled pose and results'''
+        with torch.inference_mode():
+            self.nerf.eval()
+            H, W, focal = hwf
+            rgb_list = []
+            directions = get_ray_directions(int(W // args.tinyscale), int(H // args.tinyscale), focal/args.tinyscale,
+                                            focal/args.tinyscale, (W//args.tinyscale)/2, (H//args.tinyscale)/2,
+                                            self.hparams.center_pixels, self.device)
+            index = 0
+            train_list = []
+            for train_index in self.train_items:
+                if train_index.is_val == False:
+                    train_list.append(train_index.image_index)
+            # random.shuffle(train_list)
+
+            for batch_idx in range(pose_perturb.shape[0]):
+                if batch_idx % 10 == 0:
+                    print("renders {} virtuals/total {}".format(batch_idx, pose_perturb.shape[0]))
+                pose = pose_perturb[batch_idx]
+                pose_nerf = pose.clone()
+                rays = get_rays(directions, pose_nerf.to(device), self.near, self.far, self.ray_altitude_range)
+                rays = rays.view(-1, 8).to(self.device, non_blocking=True)  # (H*W, 8)
+
+                image_indices = train_list[index] * torch.ones(rays.shape[0], device=rays.device) \
+                    if self.hparams.appearance_dim > 0 else None
+                results = {}
+
+                if 'RANK' in os.environ:
+                    nerf = self.nerf.module
+                else:
+                    nerf = self.nerf
+
+                if self.bg_nerf is not None and 'RANK' in os.environ:
+                    bg_nerf = self.bg_nerf.module
+                else:
+                    bg_nerf = self.bg_nerf
+                for i in range(0, rays.shape[0], self.hparams.image_pixel_batch_size):
+                    result_batch, _ = render_rays(nerf=nerf, bg_nerf=bg_nerf,
+                                                  rays=rays[i:i + self.hparams.image_pixel_batch_size],
+                                                  image_indices=image_indices[
+                                                            i:i + self.hparams.image_pixel_batch_size] if self.hparams.appearance_dim > 0 else None,
+                                                  hparams=self.hparams,
+                                                  sphere_center=self.sphere_center,
+                                                  sphere_radius=self.sphere_radius,
+                                                  get_depth=True,
+                                                  get_depth_variance=False,
+                                                  get_bg_fg_rgb=True)
+                    for key, value in result_batch.items():
+                        if key not in results:
+                            results[key] = []
+                        results[key].append(value.cpu())
+                for key, value in results.items():
+                    results[key] = torch.cat(value)
+
+                typ = 'fine' if 'rgb_fine' in results else 'coarse'
+                viz_result_rgbs = results[f'rgb_{typ}'].view(
+                    torch.Size([int(H // args.tinyscale), int(W // args.tinyscale), 3])).cpu()
+                # get rendered rgb(reshape to same size)
+                rgb = viz_result_rgbs.contiguous()
+                # generate nerf image
+                # torch.set_default_tensor_type('torch.cuda.FloatTensor')
+                # convert rgb to B,C,H,W
+                rgb = rgb[None, ...].permute(0, 3, 1, 2)
+                # upsample rgb to hwf size
+                rgb = torch.nn.Upsample(size=(H, W), mode='bicubic')(rgb)
+                # convert rgb back to H,W,C format
+                rgb = rgb[0].permute(1, 2, 0)
+                # torch.set_default_tensor_type('torch.FloatTensor')
+
+                rgb_list.append(rgb.cpu())
+                index+=1
+            rgbs = torch.stack(rgb_list).detach()
+        return rgbs
+
+
+    def render_meganerf(self, H, W, focal, pose_img):
+        with torch.inference_mode():
+            self.nerf.eval()
+            directions = get_ray_directions(W, H, focal,
+                                            focal, W/2, H/2,
+                                            self.hparams.center_pixels, self.device)
+            pose_nerf = pose_img.clone()
+            rays = get_rays(directions, pose_nerf.to(self.device), self.near, self.far, self.ray_altitude_range)
+            rays = rays.view(-1, 8).to(self.device, non_blocking=True)  # (H*W, 8)
+            image_indices = 5 * torch.ones(rays.shape[0], device=rays.device)
+            results = {}
+            if 'RANK' in os.environ:
+                nerf = self.nerf.module
+            else:
+                nerf = self.nerf
+
+            if self.bg_nerf is not None and 'RANK' in os.environ:
+                bg_nerf = self.bg_nerf.module
+            else:
+                bg_nerf = self.bg_nerf
+            for i in range(0, rays.shape[0], self.hparams.image_pixel_batch_size):
+                result_batch, _ = render_rays(nerf=nerf, bg_nerf=bg_nerf,
+                                              rays=rays[i:i + self.hparams.image_pixel_batch_size],
+                                              image_indices=image_indices[
+                                                    i:i + self.hparams.image_pixel_batch_size] if self.hparams.appearance_dim > 0 else None,
+                                              hparams=self.hparams,
+                                              sphere_center=self.sphere_center,
+                                              sphere_radius=self.sphere_radius,
+                                              get_depth=True,
+                                              get_depth_variance=False,
+                                              get_bg_fg_rgb=True)
+                for key, value in result_batch.items():
+                    if key not in results:
+                        results[key] = []
+                    results[key].append(value.cpu())
+            for key, value in results.items():
+                results[key] = torch.cat(value)
+
+            typ = 'fine' if 'rgb_fine' in results else 'coarse'
+            viz_result_rgbs = results[f'rgb_{typ}'].view(torch.Size([H, W, 3])).cpu()
+                # get rendered rgb(reshape to same size)
+            rgb = viz_result_rgbs.contiguous()
+        return rgb
+
+
+    def render_megarays(self, H, W, focal, rays_in):
+        with torch.inference_mode():
+            self.nerf.eval()
+            rays_o, rays_d = rays_in
+            rays = get_rays_od(rays_o, rays_d, self.near, self.far, self.ray_altitude_range)
+            rays = rays.view(-1, 8).to(self.device, non_blocking=True)  # (H*W, 8)
+            image_indices = 5 * torch.ones(rays.shape[0], device=rays.device)
+            results = {}
+            if 'RANK' in os.environ:
+                nerf = self.nerf.module
+            else:
+                nerf = self.nerf
+
+            if self.bg_nerf is not None and 'RANK' in os.environ:
+                bg_nerf = self.bg_nerf.module
+            else:
+                bg_nerf = self.bg_nerf
+            for i in range(0, rays.shape[0], self.hparams.image_pixel_batch_size):
+                result_batch, _ = render_rays(nerf=nerf, bg_nerf=bg_nerf,
+                                              rays=rays[i:i + self.hparams.image_pixel_batch_size],
+                                              image_indices=image_indices[
+                                                    i:i + self.hparams.image_pixel_batch_size] if self.hparams.appearance_dim > 0 else None,
+                                              hparams=self.hparams,
+                                              sphere_center=self.sphere_center,
+                                              sphere_radius=self.sphere_radius,
+                                              get_depth=True,
+                                              get_depth_variance=False,
+                                              get_bg_fg_rgb=True)
+                for key, value in result_batch.items():
+                    if key not in results:
+                        results[key] = []
+                    results[key].append(value.cpu())
+            for key, value in results.items():
+                results[key] = torch.cat(value)
+
+            typ = 'fine' if 'rgb_fine' in results else 'coarse'
+            viz_result_rgbs = results[f'rgb_{typ}']
+                # get rendered rgb(reshape to same size)
+            rgb = viz_result_rgbs.contiguous()
+        return rgb
