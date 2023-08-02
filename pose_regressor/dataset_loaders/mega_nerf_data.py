@@ -9,7 +9,7 @@ import torch
 from torch.utils import data
 import sys
 import cv2
-from PoseRegressor.dataset_loaders.utils.color import rgb_to_yuv
+from pose_regressor.dataset_loaders.utils.color import rgb_to_yuv
 from torchvision.datasets.folder import default_loader
 sys.path.insert(0, '../../')
 

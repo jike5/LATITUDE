@@ -2,7 +2,7 @@ import os.path as osp
 import torch.cuda
 from torch.utils.data import DataLoader
 from torchvision import transforms
-from PoseRegressor.dataset_loaders.mega_nerf_data import mega_nerf_data
+from pose_regressor.dataset_loaders.mega_nerf_data import mega_nerf_data
 
 
 def load_mega_nerf_dataloader(args, mega_nerf_model):

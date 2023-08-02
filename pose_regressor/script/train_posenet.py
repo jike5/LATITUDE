@@ -4,13 +4,13 @@ sys.path.append('../../')
 from mega_nerf.get_meganerf import load_mega_nerf
 import random
 from torch import optim
-from PoseRegressor.dataset_loaders.load_mega_nerf import load_mega_nerf_dataloader
-from PoseRegressor.script.utils import freeze_bn_layer, freeze_bn_layer_train
+from pose_regressor.dataset_loaders.load_mega_nerf import load_mega_nerf_dataloader
+from pose_regressor.script.utils import freeze_bn_layer, freeze_bn_layer_train
 from tqdm import tqdm
 from callbacks import EarlyStopping
-from PoseRegressor.script.dfnet import DFNet, DFNet_s
-from PoseRegressor.script.misc import *
-from PoseRegressor.script.options import config_parser
+from pose_regressor.script.dfnet import DFNet, DFNet_s
+from pose_regressor.script.misc import *
+from pose_regressor.script.options import config_parser
 from torch.utils.tensorboard import SummaryWriter
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

@@ -133,14 +133,14 @@ def config_parser():
     parser.add_argument("--llffhold", type=int, default=8, help='will take every 1/N images as LLFF test set, paper uses 8')
     parser.add_argument("--no_bd_factor", action='store_true', default=False, help='do not use bd factor')
 
-    # logging/saving options
+    ## logging/saving options
     parser.add_argument("--i_print",   type=int, default=1, help='frequency of console printout and metric loggin')
     parser.add_argument("--i_img",     type=int, default=500, help='frequency of tensorboard image logging')
     parser.add_argument("--i_weights", type=int, default=200, help='frequency of weight ckpt saving')
     parser.add_argument("--i_testset", type=int, default=200, help='frequency of testset saving')
     parser.add_argument("--i_video",   type=int, default=50000, help='frequency of render_poses video saving')
 
-    # mega-nerf settings
+    ## mega-nerf settings
     parser.add_argument('--exp_name', default="simple", type=str, help='experiment name')
     parser.add_argument('--config_file', default="./configs/mega-nerf/high-simple.yaml")
     parser.add_argument('--container_path', type=str, default="./high-simple-merged",
