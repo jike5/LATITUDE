@@ -88,13 +88,13 @@ python create_cluster_masks.py --config mega-nerf-output/configs/yaml/high_simpl
 ### 2) Train each submodule
 
 ```
-python mega_nerf/train.py --config_file configs/mega-nerf/${DATASET_NAME}.yml --exp_name $EXP_PATH/$EXP_PREFIX-${SUBMODULE_INDEX} --dataset_path $DATASET_PATH --chunk_paths $SCRATCH_PATH --cluster_mask_path ${MASK_PATH}/${SUBMODULE_INDEX}
+python train.py --config_file configs/mega-nerf/${DATASET_NAME}.yml --exp_name $EXP_PATH/$EXP_PREFIX-${SUBMODULE_INDEX} --dataset_path $DATASET_PATH --chunk_paths $SCRATCH_PATH --cluster_mask_path ${MASK_PATH}/${SUBMODULE_INDEX}
 ```
 **Note:**  If there are multiple submodules, train each submodule separately, means change the value of `${SUBMODULE_INDEX}`. The last folder name of `$EXP_PATH` needs to be the same as `$EXP_PREFIX`.
 
 One example is:
 ```python
-python mega_nerf/train.py --config_file mega-nerf-output/configs/yaml/high_simple.yaml --exp_name mega-nerf-output/exp/high_simple/high_simple-0  --dataset_path ../dataset/high-simple --chunk_paths mega-nerf-output/chunk_dir --cluster_mask_path mega-nerf-output/mask/high_simple/0
+python train.py --config_file mega-nerf-output/configs/yaml/high_simple.yaml --exp_name mega-nerf-output/exp/high_simple/high_simple-0  --dataset_path ../dataset/high-simple --chunk_paths mega-nerf-output/chunk_dir --cluster_mask_path mega-nerf-output/mask/high_simple/0
 ```
 
 ### 3) Merge the trained submodules into a unified Mega-NeRF model
@@ -111,7 +111,10 @@ python merge_submodules.py --config_file mega-nerf-output/configs/yaml/high_simp
 
 ### Pose Regressor
 
-
+Change settings in config/config-posenet.txt.
+```
+python pose_regressor/script/run_posenet.py --config config/config_posenet.txt
+```
 
 ### Pose Optimization
 
