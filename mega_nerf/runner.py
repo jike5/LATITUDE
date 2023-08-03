@@ -25,12 +25,12 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms as T
 from tqdm import tqdm
 
-from datasets.filesystem_dataset import FilesystemDataset
-from datasets.memory_dataset import MemoryDataset
+from mega_nerf.datasets.filesystem_dataset import FilesystemDataset
+from mega_nerf.datasets.memory_dataset import MemoryDataset
 from image_metadata import ImageMetadata
 from metrics import psnr, ssim, lpips
 from misc_utils import main_print, main_tqdm
-from models.model_utils import get_nerf, get_bg_nerf
+from mega_nerf.models.model_utils import get_nerf, get_bg_nerf
 from ray_utils import get_rays, get_ray_directions, get_rays_od
 from rendering import render_rays
 
@@ -387,12 +387,12 @@ class Runner:
 
     def _run_validation(self, train_index: int) -> Dict[str, float]:
         with torch.inference_mode():
-            self.nerf.eval() # 调用nn.Modules.eval()
+            self.nerf.eval()
 
             val_metrics = defaultdict(float)
             base_tmp_path = None
             try:
-                if 'RANK' in os.environ: # skip
+                if 'RANK' in os.environ:
                     base_tmp_path = Path(self.hparams.exp_name) / os.environ['TORCHELASTIC_RUN_ID']
                     metric_path = base_tmp_path / 'tmp_val_metrics'
                     image_path = base_tmp_path / 'tmp_val_images'
@@ -465,7 +465,7 @@ class Runner:
                         viz_depth = viz_depth.clamp_max(ma)
 
                     img = Runner._create_result_image(viz_rgbs, viz_result_rgbs, viz_depth)
-                    img.save(str("test/" + '{}.jpg'.format(i))) # GT render depth
+                    # img.save(str("test/" + '{}.jpg'.format(i))) # GT render depth
                     if self.writer is not None:
                         self.writer.add_image('val/{}'.format(i), T.ToTensor()(img), train_index)
                     else:

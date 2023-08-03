@@ -17,6 +17,7 @@ def _get_merge_opts() -> Namespace:
     parser.add_argument('--ckpt_prefix', type=str, required=True)
     parser.add_argument('--centroid_path', type=str, required=True)
     parser.add_argument('--output', type=str, required=True)
+    parser.add_argument('--ckpt_iteration', type=str, required=True)
 
     return parser.parse_known_args()[0]
 
@@ -39,12 +40,12 @@ def main(hparams: Namespace) -> None:
 
         version_dirs = sorted([int(x.name) for x in list(centroid_path.iterdir())], reverse=True)
         for version_dir in version_dirs:
-            checkpoint = centroid_path / str(version_dir) / 'models' / '{}.pt'.format(hparams.train_iterations)
+            checkpoint = centroid_path / str(version_dir) / 'models' / '{}.pt'.format(hparams.ckpt_iteration)
             if checkpoint.exists(): # 找到子模块多次训练数据中完成训练的ckpt
                 break
 
         if not checkpoint.exists():
-            raise Exception('Could not find {}.pt in {}'.format(hparams.train_iterations, checkpoint))
+            raise Exception('Could not find check point {}.pt in {}'.format(hparams.ckpt_iteration, checkpoint))
 
         loaded = torch.load(checkpoint, map_location='cpu')
         consume_prefix_in_state_dict_if_present(loaded['model_state_dict'], prefix='module.')

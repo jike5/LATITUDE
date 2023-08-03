@@ -50,10 +50,10 @@ def train_on_batch(args, rgbs, poses, feat_model, dset_size, FeatureLoss, optimi
         # target_in = targets[i_inds].clone().permute(0,3,1,2).to(device)
         rgb_in = rgbs[i_inds].clone().permute(0,3,1,2).to(device)
         pose = poses[i_inds].clone().reshape(batch_size, 12).to(device)
-        pose = torch.cat([pose, pose]) # double gt pose tensor
+        # pose = torch.cat([pose, pose]) # double gt pose tensor
 
         features, predict_pose = feat_model(rgb_in, False, upsampleH=H, upsampleW=W) # features: (1, [2, B, C, H, W])
-
+        pose[:, [3, 7, 11]] *= args.map_scale
         loss = PoseLoss(args, predict_pose, pose, device)  # target
 
         loss.backward()
@@ -101,7 +101,8 @@ def train_on_batch_with_random_view_synthesis(args, rgbs, poses, virtue_view, po
 
         # inference feature model for GT and nerf image
         _, predict_pose = feat_model(rgb_in, return_feature=False, upsampleH=H, upsampleW=W)
-
+        pose[:, [3, 7, 11]] *= args.map_scale
+        pose_perturb[:, [3, 7, 11]] *= args.map_scale
         loss_pose = PoseLoss(args, predict_pose, pose, device)  # target
         loss_f = 0  # we don't use it
 
@@ -256,6 +257,7 @@ def train_feature(args, train_dl, val_dl, test_dl, hwf, i_split, mega_nerf_model
             labels = pose.to(device)
             # labels = labels.view(1, 12)
             # pose loss
+            labels[:, [3, 7, 11]] *= args.map_scale
             _, predict = feat_model(inputs)
             loss = loss_func(predict, labels)
             val_loss_epoch.append(loss.item())

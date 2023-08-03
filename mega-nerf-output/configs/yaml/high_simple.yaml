@@ -1,3 +1,5 @@
 ray_altitude_range: [7, 102]
 val_interval: 10000
 ckpt_interval: 1000
+no_ellipse_bounds: True
+no_bg_nerf: True

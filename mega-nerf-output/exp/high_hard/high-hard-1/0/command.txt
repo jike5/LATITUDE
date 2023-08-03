@@ -1,1 +1,0 @@
-mega_nerf/train.py --config_file configs/mega-nerf/high-hard.yaml --exp_name output/high-hard-1 --dataset_path Datasets/high-hard --chunk_paths temp/high-hard-1 --cluster_mask_path Datasets/high-hard/mask/1 --train_iterations 300000 --no_bg_nerf --no_ellipse_bounds --noise_std 0.0 --use_gt_depth False

@@ -35,6 +35,8 @@ def load_mega_nerf_dataloader(args, mega_nerf_model):
         fix_idx = False
         ret_hist = True
 
+    coordinate = torch.load(osp.join(args.datadir, "coordinates.pt"))
+    args.map_scale = float(coordinate["pose_scale_factor"])
     kwargs = dict(scene=scene, data_path=data_dir,
                   transform=data_transform, target_transform=target_transform,
                   df=args.df, ret_idx=ret_idx, fix_idx=fix_idx,

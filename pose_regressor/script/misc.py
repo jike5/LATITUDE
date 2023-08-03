@@ -96,11 +96,13 @@ def compute_error_in_q(args, dl, model, device, results, batch_size=1):
         d = torch.clamp(d, -1., 1.)  # acos can only input [-1~1]
         theta = (2 * torch.acos(d) * 180 / math.pi).numpy()
         error_x = torch.linalg.norm(torch.Tensor(pose_x - predicted_x)).numpy()
+        # error_x = error_x * args.map_scale
         results[i, :] = [error_x, theta]
         # print ('Iteration: {} Error XYZ (m): {} Error Q (degrees): {}'.format(i, error_x, theta))
 
         # save results for visualization
-        predict_pose_list.append(predicted_x)
+        # predict_pose[:, :3, 3] = predict_pose[:, :3, 3] * args.map_scale
+        predict_pose_list.append(predict_pose)
         gt_pose_list.append(pose_x)
         ang_error_list.append(theta)
         i += 1
@@ -125,8 +127,14 @@ def get_error_in_q(args, dl, model, sample_size, device, batch_size=1):
     print('Mean error {}m and {} degrees.'.format(mean_result[0], mean_result[1]))
 
     # visualize results
-    # vis_pose(vis_info)
+    output_pose(args, vis_info['pose'])
     return median_result[0], median_result[1], mean_result[0], mean_result[1]
+
+
+def output_pose(args, poses):
+    poses = poses.squeeze()
+    poses = poses.reshape((-1, 12))
+    np.savetxt(args.output_path, poses)
 
 
 def get_render_error_in_q(args, model, sample_size, device, targets, rgbs, poses, batch_size=1):

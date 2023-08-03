@@ -139,6 +139,7 @@ def config_parser():
     parser.add_argument("--i_weights", type=int, default=200, help='frequency of weight ckpt saving')
     parser.add_argument("--i_testset", type=int, default=200, help='frequency of testset saving')
     parser.add_argument("--i_video",   type=int, default=50000, help='frequency of render_poses video saving')
+    parser.add_argument("--output_path",  type=str, default="mega-nerf-output/init_pose/simple.txt", help='path to the file saving poses')
 
     ## mega-nerf settings
     parser.add_argument('--exp_name', default="simple", type=str, help='experiment name')
