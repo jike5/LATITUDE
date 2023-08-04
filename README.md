@@ -106,7 +106,7 @@ python merge_submodules.py --config_file configs/mega-nerf/${DATASET_NAME}.yaml 
 
 One example is:
 ```python
-python merge_submodules.py --config_file mega-nerf-output/configs/yaml/high_simple.yaml --ckpt_prefix mega-nerf-output/exp/high_simple/high_simple- --centroid_path mega-nerf-output/mask/high_simple/params.pt --output mega-nerf-output/merged/high_simple/high_simple.pt --ckpt_iteration 150000
+python merge_submodules.py --config_file mega-nerf-output/configs/yaml/high_simple.yaml --ckpt_prefix mega-nerf-output/exp/high_simple/high_simple- --centroid_path mega-nerf-output/mask/high_simple/params.pt --output mega-nerf-output/merged/high_simple.pt --ckpt_iteration 150000
 ```
 
 ### Pose Regressor
