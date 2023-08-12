@@ -32,16 +32,16 @@ def main(hparams: Namespace) -> None:
 
     sub_modules = []
     bg_sub_modules = []
-    for i in range(len(centroids)): # 获取每一个子模块
+    for i in range(len(centroids)):
         centroid_path = ckpt_prefix.parent / '{}{}'.format(ckpt_prefix.name, i)
 
-        if not centroid_path.exists(): # 每个子模块的训练数据文件夹，其中可能包含多次实验的结果，eg. 0/ 1/ 2/ ...
+        if not centroid_path.exists():
             raise Exception('{} not found'.format(centroid_path))
 
         version_dirs = sorted([int(x.name) for x in list(centroid_path.iterdir())], reverse=True)
         for version_dir in version_dirs:
             checkpoint = centroid_path / str(version_dir) / 'models' / '{}.pt'.format(hparams.ckpt_iteration)
-            if checkpoint.exists(): # 找到子模块多次训练数据中完成训练的ckpt
+            if checkpoint.exists():
                 break
 
         if not checkpoint.exists():
@@ -76,6 +76,8 @@ def main(hparams: Namespace) -> None:
                                   hparams.pos_dir_dim > 0,
                                   hparams.appearance_dim > 0,
                                   centroid_metadata['cluster_2d'])
+    if not Path(hparams.output).parent.exists():
+        Path(hparams.output).parent.mkdir()
     torch.jit.save(torch.jit.script(container.eval()), hparams.output)
     container = torch.jit.load(hparams.output, map_location='cpu')
 

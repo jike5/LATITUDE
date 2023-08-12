@@ -40,14 +40,17 @@ from mega_nerf.opts import get_opts_base
 device = torch.device("cuda") # if torch.cuda.is_available() else "cpu")
 
 class Render:
-    def __init__(self, config: str, data_dir, hwf, K, set_experiment_path: bool = False):
+    def __init__(self, config: str, data_dir, hwf, K, container_path: str = None, set_experiment_path: bool = False):
+        assert container_path is not None
         parser = get_opts_base()
         self.hwf = hwf
         self.K = K
         self.writer = None
         parser.add_argument('--exp_name', type=str, default='0', help='experiment name')
         parser.add_argument('--dataset_path', type=str, default=data_dir)
+        
         hparams =  parser.parse_args(["--config_file", config])
+        hparams.container_path = container_path
 
         faulthandler.register(signal.SIGUSR1)
         if hparams.ckpt_path is not None:
