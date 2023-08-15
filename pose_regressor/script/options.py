@@ -85,7 +85,7 @@ def config_parser():
     parser.add_argument("--combine_loss_w", nargs='+', type=float, default=[1, 1, 1], 
                         help='weights of combined loss ex, [1, 1, 1], \
                         default None, only use when combine_loss is True')
-    parser.add_argument("--patience", nargs='+', type=int, default=[200, 50], help='set training schedule for patience [EarlyStopping, reduceLR]')
+    parser.add_argument("--patience", nargs='+', type=int, default=[10000, 50], help='set training schedule for patience [EarlyStopping, reduceLR]')
     parser.add_argument("--resize_factor", type=int, default=2, help='image resize downsample ratio')
     parser.add_argument("--freezeBN", action='store_true', help='Freeze the Batch Norm layer at training PoseNet')
     parser.add_argument("--preprocess_ImgNet", action='store_true', help='Normalize input data for PoseNet')

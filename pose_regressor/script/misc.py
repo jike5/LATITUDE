@@ -81,6 +81,7 @@ def compute_error_in_q(args, dl, model, device, results, batch_size=1):
         pose_q = transforms.matrix_to_quaternion(
             torch.Tensor(pose[:, :3, :3]))  # .cpu().numpy() # gnd truth in quaternion
         pose_x = pose[:, :3, 3]  # gnd truth position
+        pose_x = pose_x * args.map_scale
         predicted_q = transforms.matrix_to_quaternion(
             torch.Tensor(predict_pose[:, :3, :3]))  # .cpu().numpy() # predict in quaternion
         predicted_x = predict_pose[:, :3, 3]  # predict position

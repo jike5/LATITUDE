@@ -146,3 +146,6 @@ output/
 merge_output/
 chunk_dir
 .idea/
+*.pt
+*events*
+mega-nerf-output/

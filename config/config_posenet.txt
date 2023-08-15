@@ -2,28 +2,28 @@
 model_name=dfnet
 expname=dfnet
 basedir=pose_regressor/logs/high_simple       # Path to log files. Change this if change scene
-datadir=/home/chenyt/LATITUDE/high-simple      # Path to your data. Change this if change scene
+datadir=/home/chenyt/high-simple      # Path to your data. Change this if change scene
 output_path=mega-nerf-output/init_pose/simple.txt # Path to the output file of init poses. Change this if change scene
 dataset_type=mega_nerf
-trainskip=1 # train             # Skip 1/trainskip data
-testskip=1 # train              # Skip 1/trainskip data
+trainskip=1 # train             # Use (1/trainskip) data to train
+testskip=1 # test               # Use (1/testskip) data to test
 df=2                            # Downscale the image
-epochs=200                      # Number of epochs to train
+epochs=6000                      # Number of epochs to train
 tinyimg=True
 DFNet=True
-featurenet_batch_size=3         # Batch size, 4 or 8
+featurenet_batch_size=8         # Batch size, 4 or 8
 random_view_synthesis=True
-rvs_refresh_rate=30             # num_epoch every rendering new views
+rvs_refresh_rate=50             # num_epoch every rendering new views
 rvs_trans=0.05                  # translation range for random view synthesis
-rvs_rotation=8                  # rotation range for random view synthesis
+rvs_rotation=5                  # rotation range for random view synthesis
 d_max=1                         # max translation range for calculate bounding box of random view synthesis
 
 ## mega-nerf settings below:
 exp_name=mega-nerf-output/null
 config_file=mega-nerf-output/configs/yaml/high_simple.yaml        # Path to mega-nerf setting file. Change this if change scene
-container_path=mega-nerf-output/merged/high_simple/high_simple.pt   # Path to merged mega-nerf parameter file. Change this if change scene
+container_path=mega-nerf-output/merged/high_simple.pt   # Path to merged mega-nerf parameter file. Change this if change scene
 
 eval=False
 ############################################### If doing test  ###############################################
-## eval=True
-## pretrain_model_path=pose_regressor/logs/high_simple/dfnet/checkpoint-0141-0.0008.pt
+eval=True
+pretrain_model_path=pose_regressor/logs/high_simple/dfnet/checkpoint-0651-2.9609.pt

@@ -1,9 +1,9 @@
 import os
 import sys
-sys.path.append('../../')
 from mega_nerf.get_meganerf import load_mega_nerf
 import random
 from torch import optim
+import torchvision
 from pose_regressor.dataset_loaders.load_mega_nerf import load_mega_nerf_dataloader
 from pose_regressor.script.utils import freeze_bn_layer, freeze_bn_layer_train
 from tqdm import tqdm
@@ -143,7 +143,7 @@ def train_feature(args, train_dl, val_dl, test_dl, hwf, i_split, mega_nerf_model
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.95, patience=args.patience[1], verbose=True)
 
     # set callbacks parameters
-    early_stopping = EarlyStopping(args, patience=args.patience[0], verbose=False)
+    early_stopping = EarlyStopping(args, patience=args.patience[0], verbose=False, delta=0.5)
 
     # loss function
     loss_func = nn.MSELoss(reduction='mean')
@@ -192,13 +192,14 @@ def train_feature(args, train_dl, val_dl, test_dl, hwf, i_split, mega_nerf_model
 
     # visualize rgb
     # unloader = torchvision.transforms.ToPILImage()
+    # os.makedirs(os.path.join(basedir, expname, 'output_img_rgb'), exist_ok=True)
     # for i in range(rgbs.shape[0]):
     #     vis = rgbs[i].permute(2, 0, 1)
     #     writer.add_image("rgb_images", vis, i)
     #     image = vis.clone()  # clone the tensor
     #     image = image.squeeze(0)  # remove the fake batch dimension
     #     image = unloader(image)
-    #     image.save('./output_img_rgb/' + str(i) + '.jpg')
+    #     image.save(os.path.join(basedir, expname, 'output_img_rgb/') + str(i) + '.jpg')
 
 
     dset_size = len(train_dl.dataset)
@@ -237,13 +238,14 @@ def train_feature(args, train_dl, val_dl, test_dl, hwf, i_split, mega_nerf_model
                 visualization
                 '''
                 # unloader = torchvision.transforms.ToPILImage()
+                # os.makedirs(os.path.join(basedir, expname, 'output_img_virtual'), exist_ok=True)
                 # for i in range(virtue_view.shape[0]):
                 #     vis = virtue_view[i].permute(2, 0, 1)
                 #     writer.add_image("virtual_images", vis, i)
                 #     image = vis.clone()  # clone the tensor
                 #     image = image.squeeze(0)  # remove the fake batch dimension
                 #     image = unloader(image)
-                #     image.save('./output_img_virtual/' + str(i) + '.jpg')
+                #     image.save(os.path.join(basedir, expname, 'output_img_virtual/') + str(i) + '.jpg')
 
             train_loss = train_on_batch_with_random_view_synthesis(args, rgbs, poses, virtue_view, poses_perturb, feat_model, dset_size, loss_func, optimizer, hwf)
             
