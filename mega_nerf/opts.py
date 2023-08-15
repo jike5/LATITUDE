@@ -3,7 +3,7 @@ import configargparse
 
 def get_opts_base():
     parser = configargparse.ArgParser()
-    parser.add_argument('--config_file', is_config_file=True) # 读取config file内容？
+    parser.add_argument('--config_file', is_config_file=True) 
 
     parser.add_argument('--dataset_type', type=str, default='filesystem', choices=['filesystem', 'memory'],
                         help="""specifies whether to hold all images in CPU memory during training, or whether to write randomized
@@ -32,7 +32,7 @@ def get_opts_base():
     parser.add_argument('--coarse_samples', type=int, default=256,
                         help='number of coarse samples')
     parser.add_argument('--fine_samples', type=int, default=512,
-                        help='number of additional fine samples') # 不是说没有coarse to fine吗？
+                        help='number of additional fine samples')
 
     parser.add_argument('--train_scale_factor', type=int, default=1,
                         help='downsamples training images if greater than 1')

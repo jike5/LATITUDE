@@ -143,9 +143,10 @@ test/
 mask_path.tar.gz
 logs/
 output/
-merge_output/
+mega-nerf-output/
 chunk_dir
 .idea/
 *.pt
 *events*
 mega-nerf-output/
+.vscode

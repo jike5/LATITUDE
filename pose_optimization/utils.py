@@ -17,6 +17,8 @@ def config_parser():
                         help='mega-nerf config file path')
     parser.add_argument("--output_dir", type=str, default='./output/',
                         help='where to store output logs, images, videos')
+    parser.add_argument("--container_path", type=str, default=None,
+                        help='path to merged nerf model')
     parser.add_argument("--video", action='store_false', help='output video of pose optimization')
     parser.add_argument("--bsz", type=int, default=1)
     parser.add_argument("--nworkers", type=int, default=0)

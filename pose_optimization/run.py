@@ -25,7 +25,7 @@ def run(args, log_dir):
     train_dataset, val_dataset, train_loader, val_loader = get_dataloader(args.data_dir, data_conf, args.bsz, args.nworkers)
     hwf, K = val_dataset.get_hwf_K()
     MAP_SCALE = val_dataset.get_map_scale()
-    render = Render(args.nerf_config, args.data_dir, hwf, K)
+    render = Render(args.nerf_config, args.data_dir, hwf, K, args.container_path)
 
     if args.tdlf and not args.inerf:
         for i in range(len(render.nerf.sub_modules)):
