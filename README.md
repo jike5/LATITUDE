@@ -1,5 +1,5 @@
 # LATITUDE(ICRA2023)
-This is the official repository of [**LATITUDE: Robotic Global Localization with Truncated Dynamic Low-pass Filter in City-scale NeRF**](https://arxiv.org/abs/2209.08498).
+This is the official repository of [**LATITUDE: Robotic Global Localization with Truncated Dynamic Low-pass Filter in City-scale NeRF**](https://ieeexplore.ieee.org/abstract/document/10161570).
 
 
 ## Introduction
