@@ -116,11 +116,13 @@ python pose_optimization/run.py --data_dir $DATASET_PATH --nerf_config config/${
 If this work is helpful for your research, please cite the following BibTeX entry.
 
 ```
-@article{zhu2022latitude,
+@article{zhu2023latitude,
   title={LATITUDE: Robotic Global Localization with Truncated Dynamic Low-pass Filter in City-scale NeRF},
   author={Zhu, Zhenxin and Chen, Yuantao and Wu, Zirui and Hou, Chao and Shi, Yongliang and Li, Chuxuan and Li, Pengfei and Zhao, Hao and Zhou, Guyue},
-  journal={arXiv preprint arXiv:2209.08498},
-  year={2022}
+  booktitle={2023 IEEE International Conference on Robotics and Automation (ICRA)},
+  pages={8326--8332},
+  year={2023},
+  organization={IEEE}
 }
 ```
 
