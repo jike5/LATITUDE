@@ -134,4 +134,4 @@ Zhenxin Zhu: zhenxinzhu163@163.com, Yuantao Chen: yuantao@xauat.edu.cn, Zirui Wu
 
 ## Acknowledgements
 
-We would like to thank [mega-nerf](https://github.com/cmusatyalab/mega-nerf), [barf](https://github.com/chenhsuanlin/bundle-adjusting-NeRF) and [inerf](https://github.com/salykovaa/inerf) for making their project public.
+We would like to thank [mega-nerf](https://github.com/cmusatyalab/mega-nerf), [barf](https://github.com/chenhsuanlin/bundle-adjusting-NeRF) and [dfnet](https://github.com/ActiveVisionLab/DFNet) for making their project public.
