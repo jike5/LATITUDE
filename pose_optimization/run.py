@@ -8,6 +8,7 @@ from PIL import Image
 from torch.utils.tensorboard import SummaryWriter
 
 from utils import config_parser, find_Uniform_POI, find_POI, img2mse, trans_x, trans_y, trans_z, R_phi, R_theta, R_psi
+from utils import read_pose_file
 from render_helpers import to8b
 from inerf_helpers import camera_transf
 
@@ -36,6 +37,12 @@ def run(args, log_dir):
     delta_y = args.delta_y / MAP_SCALE
     delta_z = args.delta_z / MAP_SCALE
 
+    use_pose_regressor_as_init = False
+    init_poses_list = []
+    if args.pose_regressor_input is not None:
+        use_pose_regressor_as_init = True
+        init_poses_list = read_pose_file(args.pose_regressor_input, MAP_SCALE)
+
     last_idx = len(train_loader) - 1
     for batchi, (imgs, poses, hwfs, Ks) in enumerate(train_loader):
         batch_len = imgs.shape[0] # B H W C
@@ -62,7 +69,10 @@ def run(args, log_dir):
             obs_img_pose_4 = np.eye(4)
             obs_img_pose_4[:3, :3] = obs_img_pose_R
             obs_img_pose_4[:3, 3] = obs_img_pose[:3, 3]
-            start_pose = trans_x(delta_x) @ trans_y(delta_y) @ trans_z(delta_z) @ obs_img_pose_4
+            if use_pose_regressor_as_init:
+                start_pose = init_poses_list[index]
+            else:
+                start_pose = trans_x(delta_x) @ trans_y(delta_y) @ trans_z(delta_z) @ obs_img_pose_4
 
             # find points of interest of the observed image
             if args.sampling_strategy == 'uniform_interest_regions':

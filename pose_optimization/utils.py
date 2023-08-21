@@ -22,6 +22,8 @@ def config_parser():
     parser.add_argument("--video", action='store_false', help='output video of pose optimization')
     parser.add_argument("--bsz", type=int, default=1)
     parser.add_argument("--nworkers", type=int, default=0)
+    parser.add_argument("--pose_regressor_input", type=str, default=None, 
+                        help='pose_regressor module output file')
     # iNeRF options
     parser.add_argument("--dil_iter", type=int, default=1,
                         help='Number of iterations of dilation process')
@@ -400,3 +402,21 @@ def get_tensorboard_writer(path):
     experiment_path = exp_dir / str(version)
     writer = SummaryWriter(log_dir = experiment_path)
     return writer
+
+
+def read_pose_file(file_path, MAP_SCALE):
+    # real world scale
+    dfnet_poses = []
+    with open(file_path, "r") as f:
+        for line in f.readlines():
+            pose_init = line.strip().split(" ")
+            pose_init = np.array([float(pose) for pose in pose_init]).reshape(3,4)
+            pose_init[:3, 3] =  pose_init[:3, 3] / MAP_SCALE
+            R_vec = cv2.Rodrigues(pose_init[:3,:3])[0]
+            pose_init[:3,:3] = cv2.Rodrigues(R_vec)[0]
+            start_pose = np.eye(4)
+            start_pose[:3, :] = pose_init
+            dfnet_poses.append(start_pose) # 地图尺度
+
+    return dfnet_poses
+
