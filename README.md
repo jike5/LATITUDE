@@ -20,7 +20,7 @@ Create a conda virtual environment and activate it.
 
 ```sh
 conda env create -f environment.yml
-conda activate latitude
+conda activate LATITUDE
 ```
 
 ### Prepare Dataset
