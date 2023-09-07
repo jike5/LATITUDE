@@ -9,12 +9,6 @@ This is the official repository of [**LATITUDE: Robotic Global Localization with
 In this work, we present LATITUDE: Global Localization with Truncated Dynamic Low-pass Filter, which introduces a **two-stage localization mechanism** in large-scale NeRF. In **place recognition stage**, we train a regressor through images generated from trained NeRFs, which provides an initial value for global localization. In **pose optimization stage**, we minimize the residual between
 the observed image and rendered image by directly optimizing the pose on the tangent plane. To avoid falling into local optimum, we introduce a **Truncated Dynamic Low-pass Filter (TDLF)** for coarse-to-fine pose registration. We evaluate our method on both synthetic and real-world data and show its potential applications for high-precision navigation in large-scale city scenes.
 
-## TODO:
-
-Update environment
-
-Update pose regressor interface
-
 ## Overview
 
 This preliminary codebase currently only shows how to apply LATITUDE with mega-NeRF. However, it can work with the original NeRF as well.
