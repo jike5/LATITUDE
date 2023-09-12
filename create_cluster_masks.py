@@ -83,12 +83,12 @@ def main(hparams: Namespace) -> None:
 
     main_print('Centroids: {}'.format(centroids))
 
-    near = hparams.near / pose_scale_factor # hparams.near 默认为1
+    near = float(hparams.near / pose_scale_factor) # hparams.near 默认为1
 
     if hparams.far is not None:
-        far = hparams.far / pose_scale_factor
+        far = float(hparams.far / pose_scale_factor)
     else:
-        far = 2
+        far = 2.0
 
     torch.save({
         'origin_drb': origin_drb,
