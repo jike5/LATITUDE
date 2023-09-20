@@ -13,7 +13,7 @@ the observed image and rendered image by directly optimizing the pose on the tan
 
 This preliminary codebase currently only shows how to apply LATITUDE with mega-NeRF. However, it can work with the original NeRF as well.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/T72y8IXS_Oo?si=TMdO4jxX9vR01tHN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+[![LATITUDE](https://res.cloudinary.com/marcomontalbano/image/upload/v1695218527/video_to_markdown/images/youtube--T72y8IXS_Oo-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=T72y8IXS_Oo "LATITUDE")
 
 ### Environment setup
 
