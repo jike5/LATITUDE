@@ -13,6 +13,7 @@ the observed image and rendered image by directly optimizing the pose on the tan
 
 This preliminary codebase currently only shows how to apply LATITUDE with mega-NeRF. However, it can work with the original NeRF as well.
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/T72y8IXS_Oo?si=TMdO4jxX9vR01tHN" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 ### Environment setup
 
@@ -110,6 +111,8 @@ Run the command to start the optimization, you can set the relevant noise parame
 ```
 python pose_optimization/run.py --data_dir $DATASET_PATH --nerf_config config/${DATASET_NAME}.yml --container_path $MERGED_OUTPUT
 ```
+
+You can use `--pose_regressor_input` option to use `PoseRegressor` module's output as intial value.
 
 ## Bibtex
 
